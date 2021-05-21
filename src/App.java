@@ -140,14 +140,17 @@ public class App {
     public static String getClassPath(String libPath){
         String classPath = ".;";
         StringBuilder builder = new StringBuilder();
-
         try {
             Stream<Path> paths = Files.walk(Paths.get(libPath));
             Path[] allFiles = paths.filter(item -> item.toFile().isFile()).toArray(Path[]::new);
             for (Path filename: allFiles){
                 builder.append("./");
                 builder.append(filename.toString().replace("\\", "/"));
-                builder.append("/;");
+                if (System.getProperty("os.name").startsWith("Windows")){
+                    builder.append("/;");
+                } else{
+                    builder.append("/:");
+                }
             }
             paths.close();
             classPath = builder.toString();
@@ -250,7 +253,6 @@ public class App {
     }
 
     public static void compile(Path[] files, BuildConfig config){
-        new File("./"+config.getBuildDir()).mkdirs();
         JavaCompiler compiler =  ToolProvider.getSystemJavaCompiler();
         StandardJavaFileManager filemanager = compiler.getStandardFileManager(null, null, null);
         Iterable<? extends JavaFileObject> toCompile = filemanager.getJavaFileObjectsFromPaths(Arrays.asList(files));
