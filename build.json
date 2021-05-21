@@ -1,0 +1,12 @@
+{
+ "name":"gBuild",
+ "dependencies":"lib",
+ "source":"src",
+ "buildDir":"target",
+ "binDir":"bin",
+ "Version":"1.0",
+ "manifest":{
+     "MainClass":"App"
+ }
+
+}
