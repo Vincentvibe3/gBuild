@@ -234,7 +234,7 @@ public class App {
 
     public static Manifest buildManifest(JSONObject attr, BuildConfig config){
         Manifest manifest = new Manifest();
-        if(attr.has("Version")){
+        if(config.getVer() != null){
             manifest.getMainAttributes().put(Attributes.Name.MANIFEST_VERSION, config.getVer());
         }
 
