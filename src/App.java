@@ -250,6 +250,7 @@ public class App {
     }
 
     public static void compile(Path[] files, BuildConfig config){
+        new File("./"+config.getBuildDir()).mkdirs();
         JavaCompiler compiler =  ToolProvider.getSystemJavaCompiler();
         StandardJavaFileManager filemanager = compiler.getStandardFileManager(null, null, null);
         Iterable<? extends JavaFileObject> toCompile = filemanager.getJavaFileObjectsFromPaths(Arrays.asList(files));
