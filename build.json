@@ -4,7 +4,7 @@
  "source":"src",
  "buildDir":"target",
  "binDir":"bin",
- "Version":"1.0",
+ "Version":"1.0.1a",
  "manifest":{
      "MainClass":"com.gbuild.build.main"
  }
