@@ -45,7 +45,7 @@ jobs:
         uses: TheDoctor0/zip-release@0.4.2
         with:
           filename: 'release.zip'
-          exclusions: '*.git* *.java *.class Scripts/* Scripts'
+          exclusions: '*.git* *.java *.class Scripts/* Scripts src/* build.json ./build .github .gitignore'
 
       
       #release
