@@ -39,7 +39,7 @@ jobs:
         run: chmod +x ./bin/gBuild
       
       - name: Build
-        run: ./gBuild -v build
+        run: ./bin/gBuild -v build
       
       - name: Zip Release
         uses: TheDoctor0/zip-release@0.4.2
