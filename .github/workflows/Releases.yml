@@ -43,7 +43,7 @@ jobs:
         uses: TheDoctor0/zip-release@0.4.2
         with:
           filename: 'release.zip'
-          exclusions: '*.git* *src/* *target/*'
+          exclusions: '*.git* *.java *.class'
 
       
       - name: Release
