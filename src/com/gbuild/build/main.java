@@ -1,3 +1,4 @@
+package com.gbuild.build;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -5,11 +6,12 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -28,52 +30,55 @@ import org.json.JSONObject;
 import org.json.JSONTokener;
 import org.json.JSONException;
 
-public class App {
+public class main {
+    private static boolean verbose = false;
+    private static String mode = "";
+    private static String usage = "Usage: [-v] [clean | compile | build]";
     public static void main(String[] args) throws Exception {
-        String mode = "";
-
+        long startTime = Instant.now().toEpochMilli();
         try{
-            mode = args[0];
+            if (args.length > 2){
+                System.out.println("Too many arguments were passed");
+                System.out.println(usage);
+                System.exit(1);
+            }
+
+            else if (args[0].equals("-v")){
+                verbose = true;
+                mode = args[1];
+                
+            } else if (args[0].equals("clean") || args[0].equals("build") || args[0].equals("compile")){
+                mode = args[0];
+
+            } else {
+                System.out.println("Invalid argument");
+                System.out.println(usage);
+                System.exit(1);
+
+            }
 
         } catch (IndexOutOfBoundsException indexfail){
             System.out.println("Please specify a mode");
-            System.out.println("Usage: [clean | compile | build]");
+            System.out.println(usage);
             System.exit(1);
         }
 
         if (mode.equals("clean")){
-            System.out.println("Fetching config");
             BuildConfig config = readConfig();
-            System.out.println("Cleaning project");
-            cleanBuild(config);
-            cleanBin(config);
-            System.out.println("DONE");
+            clean(config);
 
         } else if (mode.equals("compile")){
-            System.out.println("Fetching config");
             BuildConfig config = readConfig();
-            System.out.println("Cleaning project");
-            cleanBuild(config);
-            cleanBin(config);
-            System.out.println("Fetching files");
+            clean(config);
             Path[] files = getFilesToCompile(config.getSource());
-            System.out.println("Compiling");
             compile(files, config);
-            System.out.println("DONE");
 
         } else if (mode.equals("build")){
-            System.out.println("Fetching config");
             BuildConfig config = readConfig();
-            System.out.println("Cleaning project");
-            cleanBuild(config);
-            cleanBin(config);
-            System.out.println("Fetching files");
+            clean(config);
             Path[] files = getFilesToCompile(config.getSource());
-            System.out.println("Compiling");
             compile(files, config);
-            System.out.println("Creating jar");
             createJar(config);
-            System.out.println("DONE");
 
         } else {
             System.out.println("Please specify a mode");
@@ -81,60 +86,43 @@ public class App {
             System.exit(1);
         }
 
+        long endTime = Instant.now().toEpochMilli();
+        System.out.println("[[92m TASKS COMPLETE [0m] Completed in "+(endTime-startTime)+" ms");
         System.exit(0);
 
     }
 
-    public static void cleanBuild(BuildConfig config){
+    public static void clean(BuildConfig config){
+        System.out.println("[[36m TASK [0m]: Cleaning Project");
         String buildDirName = config.getBuildDir();
-
-        try {
-            Stream<Path> pathsBuild = Files.walk(Paths.get(buildDirName));
-            Path[] buildElements = pathsBuild.toArray(Path[]::new);
-            for (var i = buildElements.length-1; i>=0; i--){
-                boolean success = buildElements[i].toFile().delete();
-                if (success){
-                    System.out.println("Removed: " + buildElements[i]);
-                } else{
-                    System.out.println("Failed: " + buildElements[i]);
-                }
-            }
-            pathsBuild.close();
-
-        } catch (NoSuchFileException filefail){
-                System.err.println("No builds to clean");
-
-        } catch (IOException iofail) {
-            iofail.printStackTrace();
-            System.exit(1);
-
-        } 
-    }
-
-    public static void cleanBin(BuildConfig config){
         String binDirName = config.getBinDir();
-
-        try {
-            Stream<Path> pathsBin = Files.walk(Paths.get(binDirName));
-            Path[] binElements = pathsBin.toArray(Path[]::new);
-            for (var i = binElements.length-1; i>=0; i--){
-                boolean success = binElements[i].toFile().delete();
-                if (success){
-                    System.out.println("Removed: " + binElements[i]);
-                } else{
-                    System.out.println("Failed: " + binElements[i]);
+        String[] dirs = {buildDirName, binDirName};
+        for (String dirname : dirs){
+            try {
+                Stream<Path> paths = Files.walk(Paths.get(dirname));
+                Path[] elements = paths.toArray(Path[]::new);
+                for (var i = elements.length-1; i>=0; i--){
+                    boolean success = elements[i].toFile().delete();
+                    if (success && verbose){
+                        System.out.println("[[92m REMOVED [0m]: " + elements[i]);
+                    } else if (verbose){
+                        System.out.println("[[31m FAILED [0m]: "+ elements[i]);
+                    }
                 }
+                paths.close();
+
+            } catch (NoSuchFileException filefail){
+                if(verbose){
+                    System.err.println("[[33m INFO [0m]: "+dirname+" is clean");
+                }
+
+            } catch (IOException iofail) {
+                System.err.print("[[31m FAILED [0m]: ");
+                iofail.printStackTrace();
+                System.exit(1);
+
             }
-            pathsBin.close();
-
-        } catch (NoSuchFileException filefail){
-                System.err.println("No binaries to clean");
-
-        } catch (IOException iofail) {
-            iofail.printStackTrace();
-            System.exit(1);
-
-        } 
+        }
     }
 
     public static String getClassPath(String libPath){
@@ -156,6 +144,7 @@ public class App {
             classPath = builder.toString();
 
         } catch (IOException iofail) {
+            System.err.print("[[31m FAILED [0m]: ");
             iofail.printStackTrace();
             System.exit(1);
         }
@@ -178,6 +167,7 @@ public class App {
             classPath = builder.toString();
 
         } catch (IOException iofail) {
+            System.err.print("[[31m FAILED [0m]: ");
             iofail.printStackTrace();
             System.exit(1);
         }
@@ -185,6 +175,7 @@ public class App {
     }
 
     public static Path[] getFilesToCompile(String basePath){
+        System.out.println("[[36m TASK [0m]: Fetching Files");
         Path[] allFiles = null;
         try {
             
@@ -193,6 +184,7 @@ public class App {
             paths.close();
 
         } catch (IOException iofail) {
+            System.err.print("[[31m FAILED [0m]: ");
             iofail.printStackTrace();
             System.exit(1);
         }     
@@ -200,35 +192,44 @@ public class App {
     }
 
     public static BuildConfig readConfig(){
+        System.out.println("[[36m TASK [0m]: Fetching Config");
         Path path = Paths.get("build.json");
         File configFile = path.toFile();
 
         BuildConfig config = new BuildConfig();
 
+        
         try {
             FileReader reader = new FileReader(configFile);
             JSONObject data = new JSONObject(new JSONTokener(reader));
             reader.close();
-            config.setDependencies(data.getString("dependencies"));
-            config.setSource(data.getString("source"));
             config.setBuildDir(data.getString("buildDir"));
-            config.setName(data.getString("name"));
             config.setBinDir(data.getString("binDir"));
-            config.setVer(data.getString("Version"));
-            Manifest manifest = buildManifest(data.getJSONObject("manifest"), config);
-            config.setManifest(manifest);
-            config.getManifestInfo();
-
+            if (!mode.equals("clean")){
+                config.setDependencies(data.getString("dependencies"));
+                config.setName(data.getString("name"));
+                config.setVer(data.getString("Version"));
+                config.setSource(data.getString("source"));
+                Manifest manifest = buildManifest(data.getJSONObject("manifest"), config);
+                config.setManifest(manifest);
+                if (verbose){
+                    config.getManifestInfo();
+                }
+            }
+   
         } catch(FileNotFoundException filefail){
-            System.err.println("No build config(build.xml) found in current directory");
+            System.err.println("[[31m FAILED [0m]: No config(build.json) found in current directory");
+            System.err.println("[[31m FAILED [0m]: Please create a build.json config file");
             System.exit(1);
 
         } catch (IOException iofail){
+            System.err.print("[[31m FAILED [0m]: ");
             iofail.printStackTrace();
             System.exit(1);
 
         } catch(JSONException jsonfail){
-            System.err.println("build.json file is malformed");
+            System.err.println("[[31m FAILED [0m]: build.json is malformed");
+            System.err.println("[[31m FAILED [0m]: Check build.json");
             System.exit(1);
 
         }
@@ -253,6 +254,7 @@ public class App {
     }
 
     public static void compile(Path[] files, BuildConfig config){
+        System.out.println("[[36m TASK [0m]: Compiling");
         JavaCompiler compiler =  ToolProvider.getSystemJavaCompiler();
         StandardJavaFileManager filemanager = compiler.getStandardFileManager(null, null, null);
         Iterable<? extends JavaFileObject> toCompile = filemanager.getJavaFileObjectsFromPaths(Arrays.asList(files));
@@ -276,7 +278,9 @@ public class App {
         String buildDir = config.getBuildDir();
         options.addAll(Arrays.asList("-classpath", classPath));
         options.addAll(Arrays.asList("-d", "./"+buildDir));
-        System.out.println("Options: "+options);
+        if (verbose){
+            System.out.println("[[33m INFO [0m]: Options: "+options);
+        }
         return options;
     }
 
@@ -290,6 +294,7 @@ public class App {
             paths.close();
 
         } catch (IOException iofail) {
+            System.err.print("[[31m FAILED [0m]: ");
             iofail.printStackTrace();
             System.exit(1);
         }
@@ -297,7 +302,9 @@ public class App {
     }
 
     public static void createJar(BuildConfig config){
+        System.out.println("[[36m TASK [0m]: Packaging Jar");
         Manifest manifest = config.getManifest();
+
         try {
             new File("./"+config.getBinDir()).mkdirs();
             File jarfile = Paths.get(config.getBinDir()+"/"+config.getName()+"-"+config.getVer()+".jar").toFile();
@@ -305,6 +312,9 @@ public class App {
             JarOutputStream jarsStream = new JarOutputStream(jar, manifest);
             String[] compiledClasses = getCompiledClasses(config);
             for (String filename : compiledClasses){
+                if (verbose){
+                    System.out.println("[[33m INFO [0m]: Adding "+filename);
+                }
                 JarEntry nextEntry = new JarEntry(filename.replaceAll("\\\\", "/").replaceFirst(config.getBuildDir()+"/", ""));
                 jarsStream.putNextEntry(nextEntry);
                 File file = Paths.get(filename).toFile();
@@ -316,10 +326,12 @@ public class App {
             jarsStream.close();
 
         } catch (FileNotFoundException filefail){
+            System.err.print("[[31m FAILED [0m]: ");
             filefail.printStackTrace();
             System.exit(1);
 
         } catch (IOException iofail){
+            System.err.print("[[31m FAILED [0m]: ");
             iofail.printStackTrace();
             System.exit(1);
         }
@@ -358,10 +370,10 @@ class BuildConfig{
     }
 
     public void getManifestInfo(){
-        System.out.println("Manifest Info:");
+        System.out.println("[[33m INFO [0m]: Manifest Info");
         Attributes.Name[] attrs = {Attributes.Name.MANIFEST_VERSION, Attributes.Name.MAIN_CLASS, Attributes.Name.CLASS_PATH};
         for (Attributes.Name attr : attrs){
-            System.out.println(attr.toString()+": "+manifest.getMainAttributes().getValue(attr));
+            System.out.println("[[33m INFO [0m]: "+attr.toString()+": "+manifest.getMainAttributes().getValue(attr));
         }
     }
 
