@@ -7,7 +7,13 @@ Build Tool for Java
 ## Installation
  Clone the repository and set the ```bin``` directory to ```PATH```
 
+ Make sure the ```JAVA_HOME``` environment variable is set on Windows or if ```which java``` does not return any output on UNIX systems
+
 ## How to use
-  Gbuild [clean | compile | build]
+  ```./gBuild [-v] [clean | compile | build]```
+
+  or 
+
+  ```.\gBuild.cmd [-v] [clean | compile | build]``` on Windows
   
   A ```build.json``` file in the root of the project is used to configure the build. An example can be found [here](https://github.com/Vincentvibe3/gBuild/blob/main/build.json)
