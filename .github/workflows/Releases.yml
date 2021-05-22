@@ -38,7 +38,14 @@ jobs:
         run: |
           export BINARY=$(find ./build -type f -name 'gBuild*.jar')
           java -jar "$BINARY" -v build
+
+      - name: Prepare for zipping
+        run: |
           mv ./Scripts/* ./bin
+          cp ./bin/* gBuild/bin
+          cp ./lib/* gBuild/lib
+          cp ./LICENSE gBuild/
+          cp ./README.md gBuild/
       
       #zip files needed for release
       - name: Zip release
