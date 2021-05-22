@@ -46,7 +46,7 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/')
         with:
           files: bin/ build.json lib/ LICENSE README.md
-          dest: result.zip
+          dest: release.zip
 
 
       
