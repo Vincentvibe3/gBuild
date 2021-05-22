@@ -1,6 +1,5 @@
-# This is a basic workflow to help you get started with Actions
 
-name: CI
+name: Build releases
 
 # Controls when the action will run. 
 on:
@@ -34,18 +33,22 @@ jobs:
           java-version: '11'
           distribution: 'adopt'
       
+      #Build new binary using old binary and moves scripts
       - name: Build
         run: |
-          export BINARY=$(find ./bin -type f -name 'gBuild*.jar')
+          export BINARY=$(find ./build -type f -name 'gBuild*.jar')
           java -jar "$BINARY" -v build
+          mv ./Scripts/* ./bin
       
+      #zip files needed for release
       - name: Zip Release
         uses: TheDoctor0/zip-release@0.4.2
         with:
           filename: 'release.zip'
-          exclusions: '*.git* *.java *.class'
+          exclusions: '*.git* *.java *.class Scripts/* Scripts'
 
       
+      #release
       - name: Release
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
