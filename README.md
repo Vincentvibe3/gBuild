@@ -1,6 +1,12 @@
 # gBuild
 Build Tool for Java
 
+
+[![Build main](https://github.com/Vincentvibe3/gBuild/actions/workflows/Build.yml/badge.svg?branch=main)](https://github.com/Vincentvibe3/gBuild/actions/workflows/Build.yml)
+[![Build releases](https://github.com/Vincentvibe3/gBuild/actions/workflows/Releases.yml/badge.svg)](https://github.com/Vincentvibe3/gBuild/actions/workflows/Releases.yml)
+[![MIT license](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/Vincentvibe3/gBuild/blob/main/LICENSE)
+
+
 ## Dependencies
 [JSON-java(package org.json)](https://github.com/stleary/JSON-java)
   

@@ -1,5 +1,5 @@
 
-name: Build releases
+name: Release
 
 # Controls when the action will run. 
 on:
