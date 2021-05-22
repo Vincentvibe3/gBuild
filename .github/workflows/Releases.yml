@@ -42,6 +42,9 @@ jobs:
       - name: Prepare for zipping
         run: |
           mv ./Scripts/* ./bin
+          mkdir gBuild
+          mkdir gBuild/bin
+          mkdir gBuild/lib
           cp ./bin/* gBuild/bin
           cp ./lib/* gBuild/lib
           cp ./LICENSE gBuild/
