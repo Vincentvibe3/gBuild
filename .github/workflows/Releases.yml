@@ -34,14 +34,10 @@ jobs:
           java-version: '11'
           distribution: 'adopt'
       
-      - name: Set script as executable
-        run: chmod +x ./bin/gBuild
-      
-      - name: Set PATH
-        run: export PATH=$PATH:./bin/
-      
       - name: Build
-        run: ./bin/gBuild -v build
+        run: |
+          export BINARY=$(find ./bin -type f -name 'gBuild*.jar')
+          java -jar "$BINARY" -v build
       
       - name: Zip Release
         uses: TheDoctor0/zip-release@0.4.2
