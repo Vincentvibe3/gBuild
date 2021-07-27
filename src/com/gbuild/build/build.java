@@ -15,7 +15,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.jar.Attributes;
+
 import java.util.jar.JarEntry;
 import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
@@ -30,7 +30,7 @@ import org.json.JSONObject;
 import org.json.JSONTokener;
 import org.json.JSONException;
 
-public class main {
+public class build {
     private static boolean verbose = false;
     private static String mode = "";
     private static String usage = "Usage: [-v] [clean | compile | build]";
@@ -132,6 +132,7 @@ public class main {
             Stream<Path> paths = Files.walk(Paths.get(libPath));
             Path[] allFiles = paths.filter(item -> item.toFile().isFile()).toArray(Path[]::new);
             for (Path filename: allFiles){
+                System.out.println(filename.toString());
                 builder.append("./");
                 builder.append(filename.toString().replace("\\", "/"));
                 if (System.getProperty("os.name").startsWith("Windows")){
@@ -151,36 +152,13 @@ public class main {
         return classPath;
     }
 
-    public static String getClassPathManifest(String libPath){
-        String classPath = ".;";
-        StringBuilder builder = new StringBuilder();
-
-        try {
-            Stream<Path> paths = Files.walk(Paths.get(libPath));
-            Path[] allFiles = paths.filter(item -> item.toFile().isFile()).toArray(Path[]::new);
-            for (Path filename: allFiles){
-                builder.append("../");
-                builder.append(filename.toString().replace("\\", "/"));
-                builder.append(" ");
-            }
-            paths.close();
-            classPath = builder.toString();
-
-        } catch (IOException iofail) {
-            System.err.print("[[31m FAILED [0m]: ");
-            iofail.printStackTrace();
-            System.exit(1);
-        }
-        return classPath;
-    }
-
     public static Path[] getFilesToCompile(String basePath){
         System.out.println("[[36m TASK [0m]: Fetching Files");
         Path[] allFiles = null;
         try {
             
             Stream<Path> paths = Files.walk(Paths.get(basePath));
-            allFiles = paths.filter(item -> item.toFile().isFile()).toArray(Path[]::new);
+            allFiles = paths.filter(item -> item.toFile().isFile() && item.toFile().getName().endsWith(".java")).toArray(Path[]::new);
             paths.close();
 
         } catch (IOException iofail) {
@@ -197,7 +175,6 @@ public class main {
         File configFile = path.toFile();
 
         BuildConfig config = new BuildConfig();
-
         
         try {
             FileReader reader = new FileReader(configFile);
@@ -210,7 +187,7 @@ public class main {
                 config.setName(data.getString("name"));
                 config.setVer(data.getString("Version"));
                 config.setSource(data.getString("source"));
-                Manifest manifest = buildManifest(data.getJSONObject("manifest"), config);
+                Manifest manifest = manifestBuilder.buildManifest(data.getJSONObject("manifest"), config);
                 config.setManifest(manifest);
                 if (verbose){
                     config.getManifestInfo();
@@ -234,23 +211,6 @@ public class main {
 
         }
         return config;
-    }
-
-    public static Manifest buildManifest(JSONObject attr, BuildConfig config){
-        Manifest manifest = new Manifest();
-        if(config.getVer() != null){
-            manifest.getMainAttributes().put(Attributes.Name.MANIFEST_VERSION, config.getVer());
-        }
-
-        if(attr.has("MainClass")){
-            manifest.getMainAttributes().put(Attributes.Name.MAIN_CLASS, attr.getString("MainClass"));
-        }
-
-        if(config.getDependencies() != null){
-            manifest.getMainAttributes().put(Attributes.Name.CLASS_PATH, getClassPathManifest(config.getDependencies()));
-        }
-
-        return manifest;
     }
 
     public static void compile(Path[] files, BuildConfig config){
@@ -338,82 +298,4 @@ public class main {
         
     }
 
-}
-
-class BuildConfig{
-    private String dependencies;
-    private String source;
-    private Manifest manifest;
-    private String buildDir;
-    private String name;
-    private String binDir;
-    private String ver;
-
-    public BuildConfig(){
-        manifest = new Manifest();
-    }
-
-    public Manifest getManifest(){
-        return manifest;
-    }
-
-    public void setManifest(Manifest newmanifest){
-        manifest = newmanifest;
-    }
-
-    public String getVer(){
-        return ver;
-    }
-
-    public void setVer(String newver){
-        ver = newver;
-    }
-
-    public void getManifestInfo(){
-        System.out.println("[[33m INFO [0m]: Manifest Info");
-        Attributes.Name[] attrs = {Attributes.Name.MANIFEST_VERSION, Attributes.Name.MAIN_CLASS, Attributes.Name.CLASS_PATH};
-        for (Attributes.Name attr : attrs){
-            System.out.println("[[33m INFO [0m]: "+attr.toString()+": "+manifest.getMainAttributes().getValue(attr));
-        }
-    }
-
-    public void setDependencies(String dir){
-        dependencies = dir;
-    }
-
-    public String getBuildDir(){
-        return buildDir;
-    }
-
-    public void setBuildDir(String dir){
-        buildDir = dir;
-    }
-
-    public String getBinDir(){
-        return binDir;
-    }
-
-    public void setBinDir(String dir){
-        binDir = dir;
-    }
-
-    public String getName(){
-        return name;
-    }
-
-    public void setName(String filename){
-        name = filename;
-    }
-
-    public String getDependencies(){
-        return dependencies;
-    }
-
-    public void setSource(String src){
-        source = src;
-    }
-
-    public String getSource(){
-        return source;
-    }
 }
