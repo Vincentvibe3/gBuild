@@ -26,7 +26,7 @@ public class Build {
                 verbose = true;
                 mode = args[1];
                 
-            } else if (args[0].equals("clean") || args[0].equals("build") || args[0].equals("compile")){
+            } else if (args[0].equals("clean") || args[0].equals("build") || args[0].equals("package") || args[0].equals("compile")){
                 mode = args[0];
 
             } else {
