@@ -5,11 +5,12 @@ import java.time.Instant;
 import com.gbuild.tools.Cleaner;
 import com.gbuild.tools.Compiler;
 import com.gbuild.tools.ConfigBuilder;
+import com.gbuild.tools.Defaults;
 import com.gbuild.tools.Packager;
 import com.gbuild.util.BuildConfig;
 import com.gbuild.util.Logging;
 
-public class Build {
+public class Main {
     private static boolean verbose = false;
     private static String mode = null;
 
@@ -26,7 +27,7 @@ public class Build {
                 verbose = true;
                 mode = args[1];
                 
-            } else if (args[0].equals("clean") || args[0].equals("build") || args[0].equals("package") || args[0].equals("compile")){
+            } else if (args[0].equals("create") || args[0].equals("clean") || args[0].equals("build") || args[0].equals("package") || args[0].equals("compile")){
                 mode = args[0];
 
             } else {
@@ -44,7 +45,10 @@ public class Build {
         ConfigBuilder builder = new ConfigBuilder(verbose);
         BuildConfig config = builder.read(mode);
         
-        if (mode.equals("clean")){
+        if (mode.equals("create")){
+            Defaults.createProject();
+
+        } else if (mode.equals("clean")){
             Cleaner cleaner = new Cleaner(verbose);
             cleaner.clean(config);
 
