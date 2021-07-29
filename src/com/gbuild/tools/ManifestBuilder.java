@@ -1,4 +1,4 @@
-package com.gbuild.build;
+package com.gbuild.tools;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -8,9 +8,12 @@ import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 import java.util.stream.Stream;
 
+import com.gbuild.util.BuildConfig;
+import com.gbuild.util.Logging;
+
 import org.json.JSONObject;
 
-public class manifestBuilder {
+public class ManifestBuilder {
     public static Manifest buildManifest(JSONObject attr, BuildConfig config){
         Manifest manifest = new Manifest();
         if(config.getVer() != null){
@@ -44,7 +47,7 @@ public class manifestBuilder {
             classPath = builder.toString();
 
         } catch (IOException iofail) {
-            System.err.print("[[31m FAILED [0m]: ");
+            System.err.println(Logging.ERROR + "An error occurred while finding files");
             iofail.printStackTrace();
             System.exit(1);
         }

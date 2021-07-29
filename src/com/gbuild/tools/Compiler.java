@@ -1,4 +1,4 @@
-package com.gbuild.build;
+package com.gbuild.tools;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -10,6 +10,10 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import javax.tools.ToolProvider;
+
+import com.gbuild.util.BuildConfig;
+import com.gbuild.util.Logging;
+
 import javax.tools.JavaCompiler;
 import javax.tools.JavaFileObject;
 import javax.tools.StandardJavaFileManager;
@@ -18,19 +22,19 @@ public class Compiler {
 
     boolean verbose = false;
 
-    public Compiler(boolean v){
-        verbose = v;
+    public Compiler(boolean verbosity){
+        verbose = verbosity;
     }
 
     public void compile(BuildConfig config){
         Path[] files = getFilesToCompile(config.getSource());
-        System.out.println("[[36m TASK [0m]: Compiling");
+        System.out.println(Logging.TASK + "Compiling");
         JavaCompiler compiler =  ToolProvider.getSystemJavaCompiler();
         StandardJavaFileManager filemanager = compiler.getStandardFileManager(null, null, null);
         Iterable<? extends JavaFileObject> toCompile = filemanager.getJavaFileObjectsFromPaths(Arrays.asList(files));
         List<String> options = getOptions(config);
         if (verbose){
-            System.out.println("[[33m INFO [0m]: Options: "+options);
+            System.out.println(Logging.INFO + options);
         }
         compiler.getTask(null, filemanager, null, options, null, toCompile).call();
 
@@ -38,6 +42,7 @@ public class Compiler {
             filemanager.close();
 
         } catch(IOException iofail){
+            System.err.println(Logging.ERROR + "An error occurred while closing the file manager");
             iofail.printStackTrace();
             System.exit(1);
         }
@@ -74,7 +79,7 @@ public class Compiler {
             classPath = builder.toString();
 
         } catch (IOException iofail) {
-            System.err.print("[[31m FAILED [0m]: ");
+            System.err.println(Logging.ERROR + "An error occurred while finding files");
             iofail.printStackTrace();
             System.exit(1);
         }
@@ -82,7 +87,7 @@ public class Compiler {
     }
 
     public static Path[] getFilesToCompile(String basePath){
-        System.out.println("[[36m TASK [0m]: Fetching Files");
+        System.out.println(Logging.TASK + "Fetching Files");
         Path[] allFiles = null;
         try {
             
@@ -91,7 +96,7 @@ public class Compiler {
             paths.close();
 
         } catch (IOException iofail) {
-            System.err.print("[[31m FAILED [0m]: ");
+            System.err.println(Logging.ERROR + "An error occurred while fetching files");
             iofail.printStackTrace();
             System.exit(1);
         }     

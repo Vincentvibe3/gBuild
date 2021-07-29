@@ -1,4 +1,4 @@
-package com.gbuild.build;
+package com.gbuild.tools;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -14,12 +14,15 @@ import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
 import java.util.stream.Stream;
 
+import com.gbuild.util.BuildConfig;
+import com.gbuild.util.Logging;
+
 public class Packager {
 
     boolean verbose = false;
 
-    public Packager(boolean v){
-        verbose = v;
+    public Packager(boolean verbosity){
+        verbose = verbosity;
     }
 
     public static String[] getCompiledClasses(BuildConfig config){
@@ -32,7 +35,7 @@ public class Packager {
             paths.close();
 
         } catch (IOException iofail) {
-            System.err.print("[[31m FAILED [0m]: ");
+            System.err.println(Logging.ERROR + "An error occurred while fetching compiled classes");
             iofail.printStackTrace();
             System.exit(1);
         }
@@ -40,7 +43,7 @@ public class Packager {
     }
 
     public void createJar(BuildConfig config){
-        System.out.println("[[36m TASK [0m]: Packaging Jar");
+        System.out.println(Logging.TASK + "Packaging Jar");
         Manifest manifest = config.getManifest();
 
         try {
@@ -51,7 +54,7 @@ public class Packager {
             String[] compiledClasses = getCompiledClasses(config);
             for (String filename : compiledClasses){
                 if (verbose){
-                    System.out.println("[[33m INFO [0m]: Adding "+filename);
+                    System.out.println(Logging.INFO + "Adding " + filename);
                 }
                 JarEntry nextEntry = new JarEntry(filename.replaceAll("\\\\", "/").replaceFirst(config.getBuildDir()+"/", ""));
                 jarsStream.putNextEntry(nextEntry);
@@ -64,12 +67,12 @@ public class Packager {
             jarsStream.close();
 
         } catch (FileNotFoundException filefail){
-            System.err.print("[[31m FAILED [0m]: ");
+            System.err.println(Logging.ERROR + "A file could not found");
             filefail.printStackTrace();
             System.exit(1);
 
         } catch (IOException iofail){
-            System.err.print("[[31m FAILED [0m]: ");
+            System.err.println(Logging.ERROR + "An error occurred while adding a file");
             iofail.printStackTrace();
             System.exit(1);
         }

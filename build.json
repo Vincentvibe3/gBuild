@@ -6,7 +6,7 @@
  "binDir":"bin",
  "Version":"1.1",
  "manifest":{
-     "MainClass":"com.gbuild.build.build"
+     "MainClass":"com.gbuild.main.build"
  }
 
 }

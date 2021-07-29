@@ -1,4 +1,4 @@
-package com.gbuild.build;
+package com.gbuild.util;
 
 import java.util.jar.Manifest;
 import java.util.jar.Attributes;
@@ -34,10 +34,10 @@ public class BuildConfig {
     }
 
     public void getManifestInfo(){
-        System.out.println("[[33m INFO [0m]: Manifest Info");
+        System.out.println(Logging.INFO + "Manifest Info");
         Attributes.Name[] attrs = {Attributes.Name.MANIFEST_VERSION, Attributes.Name.MAIN_CLASS, Attributes.Name.CLASS_PATH};
         for (Attributes.Name attr : attrs){
-            System.out.println("[[33m INFO [0m]: "+attr.toString()+": "+manifest.getMainAttributes().getValue(attr));
+            System.out.println(Logging.INFO + attr.toString() + ": " + manifest.getMainAttributes().getValue(attr));
         }
     }
 
@@ -80,4 +80,5 @@ public class BuildConfig {
     public String getSource(){
         return source;
     }
+
 }
