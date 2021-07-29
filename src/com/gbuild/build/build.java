@@ -1,9 +1,7 @@
 package com.gbuild.build;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 
@@ -12,19 +10,9 @@ import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
-import java.util.jar.JarEntry;
-import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
 import java.util.stream.Stream;
-
-import javax.tools.JavaCompiler;
-import javax.tools.JavaFileObject;
-import javax.tools.StandardJavaFileManager;
-import javax.tools.ToolProvider;
 
 import org.json.JSONObject;
 import org.json.JSONTokener;
@@ -33,7 +21,7 @@ import org.json.JSONException;
 public class build {
     private static boolean verbose = false;
     private static String mode = "";
-    private static String usage = "Usage: [-v] [clean | compile | build]";
+    private static String usage = "Usage: [-v] [clean | compile | package | build]";
     public static void main(String[] args) throws Exception {
         long startTime = Instant.now().toEpochMilli();
         try{
@@ -62,27 +50,29 @@ public class build {
             System.out.println(usage);
             System.exit(1);
         }
-
+        BuildConfig config = readConfig();
         if (mode.equals("clean")){
-            BuildConfig config = readConfig();
             clean(config);
 
         } else if (mode.equals("compile")){
-            BuildConfig config = readConfig();
+            Compiler compiler = new Compiler(verbose);
             clean(config);
-            Path[] files = getFilesToCompile(config.getSource());
-            compile(files, config);
+            compiler.compile(config);
+
+        } else if (mode.equals("package")){
+            Packager packager = new Packager(verbose);
+            packager.createJar(config);
 
         } else if (mode.equals("build")){
-            BuildConfig config = readConfig();
+            Compiler compiler = new Compiler(verbose);
+            Packager packager = new Packager(verbose);
             clean(config);
-            Path[] files = getFilesToCompile(config.getSource());
-            compile(files, config);
-            createJar(config);
+            compiler.compile(config);
+            packager.createJar(config);
 
         } else {
             System.out.println("Please specify a mode");
-            System.out.println("Usage: [clean | compile | build]");
+            System.out.println(usage);
             System.exit(1);
         }
 
@@ -123,50 +113,6 @@ public class build {
 
             }
         }
-    }
-
-    public static String getClassPath(String libPath){
-        String classPath = ".;";
-        StringBuilder builder = new StringBuilder();
-        try {
-            Stream<Path> paths = Files.walk(Paths.get(libPath));
-            Path[] allFiles = paths.filter(item -> item.toFile().isFile()).toArray(Path[]::new);
-            for (Path filename: allFiles){
-                System.out.println(filename.toString());
-                builder.append("./");
-                builder.append(filename.toString().replace("\\", "/"));
-                if (System.getProperty("os.name").startsWith("Windows")){
-                    builder.append("/;");
-                } else{
-                    builder.append("/:");
-                }
-            }
-            paths.close();
-            classPath = builder.toString();
-
-        } catch (IOException iofail) {
-            System.err.print("[[31m FAILED [0m]: ");
-            iofail.printStackTrace();
-            System.exit(1);
-        }
-        return classPath;
-    }
-
-    public static Path[] getFilesToCompile(String basePath){
-        System.out.println("[[36m TASK [0m]: Fetching Files");
-        Path[] allFiles = null;
-        try {
-            
-            Stream<Path> paths = Files.walk(Paths.get(basePath));
-            allFiles = paths.filter(item -> item.toFile().isFile() && item.toFile().getName().endsWith(".java")).toArray(Path[]::new);
-            paths.close();
-
-        } catch (IOException iofail) {
-            System.err.print("[[31m FAILED [0m]: ");
-            iofail.printStackTrace();
-            System.exit(1);
-        }     
-        return allFiles;
     }
 
     public static BuildConfig readConfig(){
@@ -211,91 +157,6 @@ public class build {
 
         }
         return config;
-    }
-
-    public static void compile(Path[] files, BuildConfig config){
-        System.out.println("[[36m TASK [0m]: Compiling");
-        JavaCompiler compiler =  ToolProvider.getSystemJavaCompiler();
-        StandardJavaFileManager filemanager = compiler.getStandardFileManager(null, null, null);
-        Iterable<? extends JavaFileObject> toCompile = filemanager.getJavaFileObjectsFromPaths(Arrays.asList(files));
-        List<String> options = getOptions(config);
-        compiler.getTask(null, filemanager, null, options, null, toCompile).call();
-
-        try{
-            filemanager.close();
-
-        } catch(IOException iofail){
-            iofail.printStackTrace();
-            System.exit(1);
-        }
-        
-    }
-
-    public static List<String> getOptions(BuildConfig config){
-        List<String> options = new ArrayList<>();
-        String dependencies = config.getDependencies();
-        String classPath = getClassPath(dependencies);
-        String buildDir = config.getBuildDir();
-        options.addAll(Arrays.asList("-classpath", classPath));
-        options.addAll(Arrays.asList("-d", "./"+buildDir));
-        if (verbose){
-            System.out.println("[[33m INFO [0m]: Options: "+options);
-        }
-        return options;
-    }
-
-    public static String[] getCompiledClasses(BuildConfig config){
-        String dir = config.getBuildDir();
-        ArrayList<String> allClasses = new ArrayList<>();
-
-        try {
-            Stream<Path> paths = Files.walk(Paths.get(dir));
-            paths.filter(item -> item.toFile().isFile()).forEach(item -> allClasses.add(item.toString()));
-            paths.close();
-
-        } catch (IOException iofail) {
-            System.err.print("[[31m FAILED [0m]: ");
-            iofail.printStackTrace();
-            System.exit(1);
-        }
-        return allClasses.toArray(String[]::new);
-    }
-
-    public static void createJar(BuildConfig config){
-        System.out.println("[[36m TASK [0m]: Packaging Jar");
-        Manifest manifest = config.getManifest();
-
-        try {
-            new File("./"+config.getBinDir()).mkdirs();
-            File jarfile = Paths.get(config.getBinDir()+"/"+config.getName()+"-"+config.getVer()+".jar").toFile();
-            FileOutputStream jar = new FileOutputStream(jarfile);
-            JarOutputStream jarsStream = new JarOutputStream(jar, manifest);
-            String[] compiledClasses = getCompiledClasses(config);
-            for (String filename : compiledClasses){
-                if (verbose){
-                    System.out.println("[[33m INFO [0m]: Adding "+filename);
-                }
-                JarEntry nextEntry = new JarEntry(filename.replaceAll("\\\\", "/").replaceFirst(config.getBuildDir()+"/", ""));
-                jarsStream.putNextEntry(nextEntry);
-                File file = Paths.get(filename).toFile();
-                FileInputStream fileInputStream = new FileInputStream(file);
-                jarsStream.write(fileInputStream.readAllBytes());
-                fileInputStream.close();
-                jarsStream.closeEntry();
-            }
-            jarsStream.close();
-
-        } catch (FileNotFoundException filefail){
-            System.err.print("[[31m FAILED [0m]: ");
-            filefail.printStackTrace();
-            System.exit(1);
-
-        } catch (IOException iofail){
-            System.err.print("[[31m FAILED [0m]: ");
-            iofail.printStackTrace();
-            System.exit(1);
-        }
-        
     }
 
 }
