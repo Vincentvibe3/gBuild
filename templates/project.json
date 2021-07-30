@@ -7,14 +7,6 @@
             "name":"Main.java",
             "location":"com/project/main",
             "mainClass":true
-        },
-        {
-            "name":"test.java",
-            "location":"com/project/test"
-        },
-        {
-            "name":"data.txt",
-            "location":""
         }
     ]
 }
