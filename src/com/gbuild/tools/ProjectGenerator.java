@@ -32,7 +32,7 @@ public class ProjectGenerator {
     }
 
     public static void createBuildConfig(ProjectConfig config){
-        System.out.println(Logging.TASK + "Creating build.json");
+        Logging.print("Creating build.json", Logging.OutTypes.TASK);
         String projectDir = config.getProjectDir();
         TemplateBuildConfig buildConfig = new TemplateBuildConfig(config);
         File buildFile = Paths.get(projectDir, "build.json").toFile();
@@ -40,7 +40,7 @@ public class ProjectGenerator {
     }
 
     public static void createFilesAndDir(ProjectConfig config, String templateLocation){
-        System.out.println(Logging.TASK + "Creating placeholder files");
+        Logging.print("Creating placeholder files", Logging.OutTypes.TASK);
         String projectDir = config.getProjectDir();
         String sourceDir = config.getSourceDir();
         String libDir  = config.getDependenciesDir();
@@ -61,7 +61,7 @@ public class ProjectGenerator {
                     FileOutputStream writer = new FileOutputStream(file);
                     writer.write(content.getBytes());
                 } catch (IOException e){
-                    System.err.println(Logging.ERROR + "Failed to write file " + name);
+                    Logging.print("Failed to write file " + name, Logging.OutTypes.ERROR);
                     e.printStackTrace();
                     System.exit(1);
                 }
@@ -71,7 +71,7 @@ public class ProjectGenerator {
                     FileWriter writer = new FileWriter(file);
                     writer.write("");
                 } catch (IOException e){
-                    System.err.println(Logging.ERROR + "Failed to write file " + name);
+                    Logging.print("Failed to write file " + name, Logging.OutTypes.ERROR);
                     e.printStackTrace();
                     System.exit(1);
                 }
@@ -91,10 +91,10 @@ public class ProjectGenerator {
         try {
             fileString = Files.readString(template);;
         } catch (FileNotFoundException e){
-            System.err.println(Logging.ERROR + "template not found");
+            Logging.print("template not found", Logging.OutTypes.ERROR);
             System.exit(1);
         } catch (IOException e){
-            System.err.println(Logging.ERROR + "An error occured while reading the template");
+            Logging.print("An error occured while reading the template", Logging.OutTypes.ERROR);
             e.printStackTrace();
             System.exit(1);
         }
@@ -102,8 +102,8 @@ public class ProjectGenerator {
     }
 
     public static String getTemplateChoice(){
-        System.out.println(Logging.TASK + "Get template name");
-        System.out.println(Logging.ACTION + "Enter the template name(leave empty for default): ");
+        Logging.print("Get template name", Logging.OutTypes.TASK);
+        Logging.print("Enter the template name(leave empty for default): ", Logging.OutTypes.ACTION);
         Scanner inScan = new Scanner(System.in);
         String name = inScan.nextLine();
         if (name.isEmpty()){
@@ -113,7 +113,7 @@ public class ProjectGenerator {
     }
 
     public static String findTemplates(String templateChoice){
-        System.out.println(Logging.TASK + "Finding templates location");
+        Logging.print("Finding templates location", Logging.OutTypes.TASK);
         String path = System.getenv("Path");
         ArrayList<String> gBuildlocations = new ArrayList<>();
         Consumer<String> findGbuild = item -> {
@@ -127,7 +127,7 @@ public class ProjectGenerator {
             Arrays.asList(path.split(":")).forEach(findGbuild);
         }
         if (gBuildlocations.isEmpty()){
-            System.err.println("gBuild was not found in the PATH");
+            Logging.print("gBuild was not found in the PATH", Logging.OutTypes.ERROR);
             System.exit(1);
         }
         File buildDefault=null;
@@ -146,7 +146,7 @@ public class ProjectGenerator {
             }
         }
         if (!foundTemplates){
-            System.err.println(Logging.ERROR + "Could not find required template files");
+            Logging.print("Could not find required template files", Logging.OutTypes.ERROR);
             System.exit(1);
         }
         return templateLocation;
@@ -164,8 +164,8 @@ class ProjectConfig{
     private JSONArray files;
 
     public ProjectConfig(File config){
-        System.out.println(Logging.TASK + "Building project config");
-        System.out.println(Logging.ACTION + "Enter the project name: ");
+        Logging.print("Building project config", Logging.OutTypes.TASK);
+        Logging.print("Enter the project name: ", Logging.OutTypes.ACTION);
         Scanner inScan = new Scanner(System.in);
         String name = inScan.nextLine();
         projectDir = name.replace(" ", "_");
@@ -183,8 +183,7 @@ class ProjectConfig{
             files = data.getJSONArray("files");
             mainClass = setMainClass(files);
         } catch (FileNotFoundException e){
-            System.out.println(config.getAbsolutePath());
-            System.err.println(Logging.ERROR + "Could not find the project.json file");
+            Logging.print("Could not find the project.json file", Logging.OutTypes.ERROR);
             System.exit(1);
         }
         
@@ -211,7 +210,7 @@ class ProjectConfig{
         files.forEach(addfile);
         filesToCheck.forEach(checkFiles);
         if (main.size()!=1){
-            System.err.println(Logging.ERROR + "You must specify 1 Main Class to build a config");
+            Logging.print("You must specify 1 Main Class to build a config", Logging.OutTypes.ERROR);
             System.exit(1);
         }
         return main.get(0);
@@ -267,7 +266,7 @@ class TemplateBuildConfig{
             FileOutputStream writer = new FileOutputStream(location);
             writer.write(toString().getBytes());
         } catch (IOException e){
-            System.err.println(Logging.ERROR + "An error occured when writing build.json");
+            Logging.print("An error occured when writing build.json", Logging.OutTypes.ERROR);
             e.printStackTrace();
             System.exit(1);
         }

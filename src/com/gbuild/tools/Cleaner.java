@@ -19,7 +19,7 @@ public class Cleaner {
     }
     
     public void clean(BuildConfig config){
-        System.out.println(Logging.TASK + "Cleaning Project");
+        Logging.print("Cleaning Project", Logging.OutTypes.TASK);
         String buildDirName = config.getBuildDir();
         String binDirName = config.getBinDir();
         String[] dirs = {buildDirName, binDirName};
@@ -30,20 +30,20 @@ public class Cleaner {
                 for (var i = elements.length-1; i>=0; i--){
                     boolean success = elements[i].toFile().delete();
                     if (success && verbose){
-                        System.out.println(Logging.REMOVE + elements[i]);
+                        Logging.print(elements[i].toString(), Logging.OutTypes.REMOVE);
                     } else if (verbose){
-                        System.out.println(Logging.ERROR + elements[i]);
+                        Logging.print(elements[i].toString(), Logging.OutTypes.ERROR);
                     }
                 }
                 paths.close();
 
             } catch (NoSuchFileException filefail){
                 if(verbose){
-                    System.err.println(Logging.INFO + dirname + " is clean");
+                    Logging.print(dirname + " is clean", Logging.OutTypes.INFO);
                 }
 
             } catch (IOException iofail) {
-                System.err.println(Logging.ERROR + "An error occurred while finding files to remove");
+                Logging.print("An error occurred while finding files to remove", Logging.OutTypes.ERROR);
                 iofail.printStackTrace();
                 System.exit(1);
 

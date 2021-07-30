@@ -24,7 +24,7 @@ public class ConfigBuilder {
     }
 
     public BuildConfig read(String mode){
-        System.out.println(Logging.TASK + "Fetching Config");
+        Logging.print( "Fetching Config", Logging.OutTypes.TASK);
         Path path = Paths.get("build.json");
         File configFile = path.toFile();
 
@@ -49,19 +49,18 @@ public class ConfigBuilder {
             }
    
         } catch(FileNotFoundException filefail){
-            System.err.println(Logging.ERROR + "No config(build.json) found in current directory");
-            System.err.println(Logging.ERROR + "Please create a build.json config file");
+            Logging.print("No config(build.json) found in current directory", Logging.OutTypes.ERROR);
+            Logging.print("Please create a build.json config file", Logging.OutTypes.ERROR);
             System.exit(1);
 
         } catch (IOException iofail){
-            System.err.print(Logging.ERROR);
-            System.err.println(Logging.ERROR + "An error occurred while reading the build.json file");
+            Logging.print("An error occurred while reading the build.json file", Logging.OutTypes.ERROR);
             iofail.printStackTrace();
             System.exit(1);
 
         } catch(JSONException jsonfail){
-            System.err.println(Logging.ERROR + "build.json is malformed");
-            System.err.println(Logging.ERROR + "Check build.json");
+            Logging.print("build.json is malformed", Logging.OutTypes.ERROR);
+            Logging.print( "Check build.json", Logging.OutTypes.ERROR);
             System.exit(1);
 
         }

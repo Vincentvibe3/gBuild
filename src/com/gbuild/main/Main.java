@@ -12,35 +12,38 @@ import com.gbuild.util.Logging;
 
 public class Main {
     private static boolean verbose = false;
-    private static String mode = null;
+    private static Modes mode = null;
+
+    public enum Modes{
+        CREATE,
+        CLEAN,
+        BUILD,
+        PACKAGE,
+        COMPILE
+    }
 
     public static void main(String[] args) throws Exception {
         long startTime = Instant.now().toEpochMilli();
         Logging.enableColors();
         try{
+            String toCheck = "";
             if (args.length > 2){
-                System.out.println(Logging.INVALID_ARG_COUNT);
-                System.out.println(Logging.USAGE);
+                Logging.usage(Logging.UsageErrors.INVALID_ARG_COUNT);
                 System.exit(1);
             }
-
             else if (args[0].equals("-v")){
                 verbose = true;
-                mode = args[1];
-                
-            } else if (args[0].equals("create") || args[0].equals("clean") || args[0].equals("build") || args[0].equals("package") || args[0].equals("compile")){
-                mode = args[0];
-
+                toCheck = args[1];
             } else {
-                System.out.println(Logging.INVALID_ARG);
-                System.out.println(Logging.USAGE);
-                System.exit(1);
-
+                toCheck = args[0];
             }
+            mode = Modes.valueOf(toCheck.toUpperCase());
+        } catch (IllegalArgumentException e){
+            Logging.usage(Logging.UsageErrors.INVALID_ARG);
+            System.exit(1);
 
         } catch (IndexOutOfBoundsException indexfail){
-            System.out.println(Logging.NOMODE);
-            System.out.println(Logging.USAGE);
+            Logging.usage(Logging.UsageErrors.NOMODE);
             System.exit(1);
         }
         
@@ -49,40 +52,44 @@ public class Main {
 
         } else {
             ConfigBuilder builder = new ConfigBuilder(verbose);
-            BuildConfig config = builder.read(mode);
+            BuildConfig config = builder.read(mode.toString().toLowerCase());
             
-            if (mode.equals("clean")){
-                Cleaner cleaner = new Cleaner(verbose);
-                cleaner.clean(config);
-    
-            } else if (mode.equals("compile")){
-                Compiler compiler = new Compiler(verbose);
-                Cleaner cleaner = new Cleaner(verbose);
-                cleaner.clean(config);
-                compiler.compile(config);
-    
-            } else if (mode.equals("package")){
-                Packager packager = new Packager(verbose);
-                packager.createJar(config);
-    
-            } else if (mode.equals("build")){
-                Compiler compiler = new Compiler(verbose);
-                Packager packager = new Packager(verbose);
-                Cleaner cleaner = new Cleaner(verbose);
-                cleaner.clean(config);
-                compiler.compile(config);
-                packager.createJar(config);
-    
-            } else {
-                System.out.println(Logging.NOMODE);
-                System.out.println(Logging.USAGE);
-                System.exit(1);
+            Cleaner cleaner;
+            Compiler compiler;
+            Packager packager;
+
+            switch (mode){
+                case CLEAN:
+                    cleaner = new Cleaner(verbose);
+                    cleaner.clean(config);
+                    break;
+                case COMPILE:
+                    compiler = new Compiler(verbose);
+                    // cleaner = new Cleaner(verbose);
+                    // cleaner.clean(config);
+                    compiler.compile(config);
+                    break;
+                case PACKAGE:
+                    packager = new Packager(verbose);
+                    packager.createJar(config);
+                    break;
+                case BUILD:
+                    compiler = new Compiler(verbose);
+                    packager = new Packager(verbose);
+                    cleaner = new Cleaner(verbose);
+                    cleaner.clean(config);
+                    compiler.compile(config);
+                    packager.createJar(config);
+                    break;
+                default:
+                    Logging.usage(Logging.UsageErrors.NOMODE);
+                    System.exit(1);
             }
         }
         
 
         long endTime = Instant.now().toEpochMilli();
-        System.out.println(Logging.COMPLETION + "Completed in " + (endTime-startTime) + " ms");
+        Logging.print("Completed in " + (endTime-startTime) + " ms", Logging.OutTypes.COMPLETION);
         System.exit(0);
 
     }

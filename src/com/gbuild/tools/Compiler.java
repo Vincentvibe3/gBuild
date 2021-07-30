@@ -28,13 +28,13 @@ public class Compiler {
 
     public void compile(BuildConfig config){
         Path[] files = getFilesToCompile(config.getSource());
-        System.out.println(Logging.TASK + "Compiling");
+        Logging.print("Compiling", Logging.OutTypes.TASK);
         JavaCompiler compiler =  ToolProvider.getSystemJavaCompiler();
         StandardJavaFileManager filemanager = compiler.getStandardFileManager(null, null, null);
         Iterable<? extends JavaFileObject> toCompile = filemanager.getJavaFileObjectsFromPaths(Arrays.asList(files));
         List<String> options = getOptions(config);
         if (verbose){
-            System.out.println(Logging.INFO + options);
+            Logging.print(options.toString(), Logging.OutTypes.INFO);
         }
         compiler.getTask(null, filemanager, null, options, null, toCompile).call();
 
@@ -42,14 +42,14 @@ public class Compiler {
             filemanager.close();
 
         } catch(IOException iofail){
-            System.err.println(Logging.ERROR + "An error occurred while closing the file manager");
+            Logging.print("An error occurred while closing the file manager", Logging.OutTypes.ERROR);
             iofail.printStackTrace();
             System.exit(1);
         }
         
     }
 
-    public static List<String> getOptions(BuildConfig config){
+    public List<String> getOptions(BuildConfig config){
         List<String> options = new ArrayList<>();
         String dependencies = config.getDependencies();
         String classPath = getClassPath(dependencies);
@@ -59,14 +59,16 @@ public class Compiler {
         return options;
     }
     
-    public static String getClassPath(String libPath){
+    public String getClassPath(String libPath){
         String classPath = ".;";
         StringBuilder builder = new StringBuilder();
         try {
             Stream<Path> paths = Files.walk(Paths.get(libPath));
             Path[] allFiles = paths.filter(item -> item.toFile().isFile()).toArray(Path[]::new);
             for (Path filename: allFiles){
-                System.out.println(filename.toString());
+                if (verbose){
+                    Logging.print("Adding " + filename.toString() + " to ClassPath", Logging.OutTypes.INFO);
+                }
                 builder.append("./");
                 builder.append(filename.toString().replace("\\", "/"));
                 if (System.getProperty("os.name").startsWith("Windows")){
@@ -79,7 +81,7 @@ public class Compiler {
             classPath = builder.toString();
 
         } catch (IOException iofail) {
-            System.err.println(Logging.ERROR + "An error occurred while finding files");
+            Logging.print("An error occurred while finding files", Logging.OutTypes.ERROR);
             iofail.printStackTrace();
             System.exit(1);
         }
@@ -87,7 +89,7 @@ public class Compiler {
     }
 
     public static Path[] getFilesToCompile(String basePath){
-        System.out.println(Logging.TASK + "Fetching Files");
+        Logging.print("Fetching Files", Logging.OutTypes.TASK);
         Path[] allFiles = null;
         try {
             
@@ -96,7 +98,7 @@ public class Compiler {
             paths.close();
 
         } catch (IOException iofail) {
-            System.err.println(Logging.ERROR + "An error occurred while fetching files");
+            Logging.print("An error occurred while fetching files", Logging.OutTypes.ERROR);
             iofail.printStackTrace();
             System.exit(1);
         }     

@@ -35,7 +35,7 @@ public class Packager {
             paths.close();
 
         } catch (IOException iofail) {
-            System.err.println(Logging.ERROR + "An error occurred while fetching compiled classes");
+            Logging.print("An error occurred while fetching compiled classes", Logging.OutTypes.ERROR);
             iofail.printStackTrace();
             System.exit(1);
         }
@@ -43,7 +43,7 @@ public class Packager {
     }
 
     public void createJar(BuildConfig config){
-        System.out.println(Logging.TASK + "Packaging Jar");
+        Logging.print("Packaging Jar", Logging.OutTypes.TASK);
         Manifest manifest = config.getManifest();
 
         try {
@@ -54,7 +54,7 @@ public class Packager {
             String[] compiledClasses = getCompiledClasses(config);
             for (String filename : compiledClasses){
                 if (verbose){
-                    System.out.println(Logging.INFO + "Adding " + filename);
+                    Logging.print("Adding " + filename, Logging.OutTypes.INFO);
                 }
                 JarEntry nextEntry = new JarEntry(filename.replaceAll("\\\\", "/").replaceFirst(config.getBuildDir()+"/", ""));
                 jarsStream.putNextEntry(nextEntry);
@@ -67,12 +67,12 @@ public class Packager {
             jarsStream.close();
 
         } catch (FileNotFoundException filefail){
-            System.err.println(Logging.ERROR + "A file could not found");
+            Logging.print("A file could not found", Logging.OutTypes.ERROR);
             filefail.printStackTrace();
             System.exit(1);
 
         } catch (IOException iofail){
-            System.err.println(Logging.ERROR + "An error occurred while adding a file");
+            Logging.print("An error occurred while adding a file", Logging.OutTypes.ERROR);
             iofail.printStackTrace();
             System.exit(1);
         }

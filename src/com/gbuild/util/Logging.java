@@ -4,21 +4,83 @@ import com.sun.jna.Library;
 import com.sun.jna.Native;
 import com.sun.jna.platform.win32.WinDef.DWORD;
 import com.sun.jna.platform.win32.WinNT.HANDLE;
+
 import com.sun.jna.platform.win32.WinDef.DWORDByReference;
 
 public class Logging {
 
     private static final char escape = 27;
-    public static final String TASK = "[" + escape + "[36m TASK " + escape + "[0m]: ";
-    public static final String COMPLETION = "[\u001B[92m TASKS COMPLETE \u001B[0m] ";
-    public static final String ERROR = "[\u001B[31m FAILED \u001B[0m]: ";
-    public static final String INFO = "[\u001B[33m INFO \u001B[0m]: ";
-    public static final String USAGE = "Usage: [-v] [clean | compile | package | build]";
-    public static final String REMOVE = "[\u001B[92m REMOVED \u001B[0m]: ";
-    public static final String NOMODE = "Please specify a mode";
-    public static final String INVALID_ARG = "Invalid argument";
-    public static final String INVALID_ARG_COUNT = "Too many arguments were passed";
-    public static final String ACTION = "[\u001B[33m ACTION \u001B[0m]: ";
+    private static final int BLUE = 36;
+    private static final int GREEN = 92;
+    private static final int RED = 31;
+    private static final int YELLOW = 33;
+    private static final int RESET = 0;
+
+    private static final String NOMODE = "Please specify a mode";
+    private static final String INVALID_ARG = "Invalid argument";
+    private static final String INVALID_ARG_COUNT = "Too many arguments were passed";
+    private static final String USAGE = "Usage: [-v] [clean | compile | package | build]";
+
+    public enum OutTypes{
+        TASK,
+        COMPLETION,
+        ERROR,
+        INFO,
+        REMOVE, 
+        ACTION
+
+    }
+
+    public enum UsageErrors{
+        NOMODE,
+        INVALID_ARG,
+        INVALID_ARG_COUNT
+    }
+
+    public static void usage(UsageErrors error){
+        switch (error){
+            case NOMODE:
+                System.out.println(NOMODE);
+                break;
+            case INVALID_ARG:
+                System.out.println(INVALID_ARG);
+                break;
+            case INVALID_ARG_COUNT:
+                System.out.println(INVALID_ARG_COUNT);
+                break;
+        }
+        System.out.println(USAGE);
+    }
+
+    public static void print(String message, OutTypes type){
+        String color="";
+        String reset = escape + "[" + RESET + "m";
+        String prefix = "";
+        switch (type){
+            case TASK:
+                color = escape + "[" + BLUE + "m";
+                
+                break;
+            case COMPLETION:
+                color = escape + "[" + GREEN+ "m";
+                break;
+            case ERROR: case REMOVE:
+                color = escape + "[" + RED + "m";
+                break;
+            case INFO: case ACTION:
+                color = escape + "[" + YELLOW + "m";
+                break;
+
+        }
+        prefix = "[ " + color + type + reset + " ]: ";
+        if (type != Logging.OutTypes.ERROR){
+            System.out.println(prefix+message);
+        } else {
+            System.err.println(prefix+message);
+        }
+        
+
+    }
 
     public interface Kernel32 extends Library{
         public HANDLE GetStdHandle(DWORD STD_OUTPUT_HANDLE);

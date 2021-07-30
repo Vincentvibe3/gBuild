@@ -34,10 +34,10 @@ public class BuildConfig {
     }
 
     public void getManifestInfo(){
-        System.out.println(Logging.INFO + "Manifest Info");
+        Logging.print("Manifest Info", Logging.OutTypes.INFO);
         Attributes.Name[] attrs = {Attributes.Name.MANIFEST_VERSION, Attributes.Name.MAIN_CLASS, Attributes.Name.CLASS_PATH};
         for (Attributes.Name attr : attrs){
-            System.out.println(Logging.INFO + attr.toString() + ": " + manifest.getMainAttributes().getValue(attr));
+            Logging.print(attr.toString() + ": " + manifest.getMainAttributes().getValue(attr), Logging.OutTypes.INFO);
         }
     }
 

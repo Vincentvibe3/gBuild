@@ -47,7 +47,7 @@ public class ManifestBuilder {
             classPath = builder.toString();
 
         } catch (IOException iofail) {
-            System.err.println(Logging.ERROR + "An error occurred while finding files");
+            Logging.print("An error occurred while finding files", Logging.OutTypes.ERROR);
             iofail.printStackTrace();
             System.exit(1);
         }
