@@ -48,7 +48,7 @@ public class Main {
         }
         
         if (mode.equals("create")){
-            ProjectGenerator.createProject();
+            ProjectGenerator.createProject(verbose);
 
         } else {
             ConfigBuilder builder = new ConfigBuilder(verbose);

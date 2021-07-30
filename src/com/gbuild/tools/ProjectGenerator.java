@@ -22,7 +22,10 @@ import org.json.JSONTokener;
 
 public class ProjectGenerator {
 
-    public static void createProject(){
+    static boolean verbose = false;
+
+    public static void createProject(boolean v){
+        verbose = v;
         String templateChoice = getTemplateChoice();
         String templateLocation = findTemplates(templateChoice);
         File configFile = Paths.get(templateLocation, "project.json").toFile();
@@ -55,6 +58,9 @@ public class ProjectGenerator {
             String location = item.getString("location");
             if (name.endsWith(".java")){
                 String content = "package " + location.replace("\\", ".").replace("/", ".") + ";\n\n" + javaTemp.replace("{template}", name.replace(".java", ""));
+                if (verbose){
+                    Logging.print("Creating File " + name, Logging.OutTypes.INFO);
+                }
                 Paths.get(projectDir, sourceDir, location).toFile().mkdirs();
                 File file = Paths.get(projectDir, sourceDir, location, name).toFile();
                 try {
