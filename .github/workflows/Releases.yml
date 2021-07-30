@@ -49,6 +49,7 @@ jobs:
           cp ./lib/* gBuild/lib
           cp ./LICENSE gBuild/
           cp ./README.md gBuild/
+          cp ./templates/* gBuild/templates/default
       
       #zip files needed for release
       - name: Zip release

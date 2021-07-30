@@ -10,4 +10,5 @@ public class Logging {
     public final static String NOMODE = "Please specify a mode";
     public final static String INVALID_ARG = "Invalid argument";
     public final static String INVALID_ARG_COUNT = "Too many arguments were passed";
+    public final static String ACTION = "[\u001B[33m ACTION \u001B[0m]: ";
 }
