@@ -72,7 +72,12 @@ public class Logging {
                 break;
 
         }
-        prefix = "[ " + color + type + reset + " ]: ";
+        if (System.getProperty("os.name").equals("Windows 10")||!System.getProperty("os.name").startsWith("Windows")){
+            prefix = "[ " + color + type + reset + " ]: ";
+        } else {
+            prefix = "[ " + type + " ]: ";
+        }
+        
         if (type != Logging.OutTypes.ERROR){
             System.out.println(prefix+message);
         } else {
