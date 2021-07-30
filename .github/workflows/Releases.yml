@@ -45,6 +45,8 @@ jobs:
           mkdir gBuild
           mkdir gBuild/bin
           mkdir gBuild/lib
+          mkdir gBuild/templates
+          mkdir gBuild/templates/default
           cp ./bin/* gBuild/bin
           cp ./lib/* gBuild/lib
           cp ./LICENSE gBuild/
