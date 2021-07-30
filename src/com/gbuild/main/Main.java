@@ -16,6 +16,7 @@ public class Main {
 
     public static void main(String[] args) throws Exception {
         long startTime = Instant.now().toEpochMilli();
+        Logging.enableColors();
         try{
             if (args.length > 2){
                 System.out.println(Logging.INVALID_ARG_COUNT);
