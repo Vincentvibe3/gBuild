@@ -19,7 +19,8 @@ public class Main {
         CLEAN,
         BUILD,
         PACKAGE,
-        COMPILE
+        COMPILE,
+        HELP
     }
 
     public static void main(String[] args) throws Exception {
@@ -50,6 +51,9 @@ public class Main {
         if (mode.equals(Modes.CREATE)){
             ProjectGenerator.createProject(verbose);
 
+        } else if (mode.equals(Modes.HELP)){
+            Logging.usage(Logging.UsageErrors.NONE);
+
         } else {
             ConfigBuilder builder = new ConfigBuilder(verbose);
             BuildConfig config = builder.read(mode.toString().toLowerCase());
@@ -65,8 +69,6 @@ public class Main {
                     break;
                 case COMPILE:
                     compiler = new Compiler(verbose);
-                    // cleaner = new Cleaner(verbose);
-                    // cleaner.clean(config);
                     compiler.compile(config);
                     break;
                 case PACKAGE:
@@ -89,7 +91,9 @@ public class Main {
         
 
         long endTime = Instant.now().toEpochMilli();
-        Logging.print("Completed in " + (endTime-startTime) + " ms", Logging.OutTypes.COMPLETION);
+        if (!mode.equals(Modes.HELP)){
+            Logging.print("Completed in " + (endTime-startTime) + " ms", Logging.OutTypes.COMPLETION);
+        }
         System.exit(0);
 
     }

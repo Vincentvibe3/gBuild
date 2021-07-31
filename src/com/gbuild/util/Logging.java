@@ -34,7 +34,8 @@ public class Logging {
     public enum UsageErrors{
         NOMODE,
         INVALID_ARG,
-        INVALID_ARG_COUNT
+        INVALID_ARG_COUNT,
+        NONE
     }
 
     public static void usage(UsageErrors error){
