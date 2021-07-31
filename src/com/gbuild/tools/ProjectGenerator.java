@@ -74,7 +74,6 @@ public class ProjectGenerator {
                 }
             } else if (!isDir) {
                 File file = Paths.get(projectDir, sourceDir, location, name).toFile();
-                System.out.println(file.getAbsolutePath());
                 try{
                     FileWriter writer = new FileWriter(file);
                     writer.write("");
