@@ -1,0 +1,21 @@
+{
+    "dependenciesDir":"lib",
+    "sourceDir":"src",
+    "mainClass":"Main",
+    "files":[
+        {
+            "name":"Main.java",
+            "location":"com/project/main",
+            "mainClass":true
+        },
+        {
+            "name":"test.txt",
+            "location":""
+        },
+        {
+            "name":"data",
+            "location":"com/project/",
+            "directory": true
+        }
+    ]
+}

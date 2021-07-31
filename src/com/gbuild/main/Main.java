@@ -47,7 +47,7 @@ public class Main {
             System.exit(1);
         }
         
-        if (mode.equals("create")){
+        if (mode.equals(Modes.CREATE)){
             ProjectGenerator.createProject(verbose);
 
         } else {

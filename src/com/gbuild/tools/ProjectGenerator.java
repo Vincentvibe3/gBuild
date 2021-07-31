@@ -56,11 +56,12 @@ public class ProjectGenerator {
         Consumer<JSONObject> writeFiles = item -> {
             String name = item.getString("name");
             String location = item.getString("location");
-            if (name.endsWith(".java")){
+            boolean isDir = item.has("directory")&&item.getBoolean("directory");
+            if (verbose){
+                Logging.print("Creating " + name, Logging.OutTypes.INFO);
+            }
+            if (!isDir && name.endsWith(".java")){
                 String content = "package " + location.replace("\\", ".").replace("/", ".") + ";\n\n" + javaTemp.replace("{template}", name.replace(".java", ""));
-                if (verbose){
-                    Logging.print("Creating File " + name, Logging.OutTypes.INFO);
-                }
                 Paths.get(projectDir, sourceDir, location).toFile().mkdirs();
                 File file = Paths.get(projectDir, sourceDir, location, name).toFile();
                 try {
@@ -71,8 +72,9 @@ public class ProjectGenerator {
                     e.printStackTrace();
                     System.exit(1);
                 }
-            } else {
+            } else if (!isDir) {
                 File file = Paths.get(projectDir, sourceDir, location, name).toFile();
+                System.out.println(file.getAbsolutePath());
                 try{
                     FileWriter writer = new FileWriter(file);
                     writer.write("");
@@ -81,6 +83,8 @@ public class ProjectGenerator {
                     e.printStackTrace();
                     System.exit(1);
                 }
+            } else {
+                Paths.get(projectDir, sourceDir, location, name).toFile().mkdirs();
             }
         };
         Consumer<Object> addfile = item -> {

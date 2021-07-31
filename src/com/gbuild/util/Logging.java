@@ -19,7 +19,7 @@ public class Logging {
     private static final String NOMODE = "Please specify a mode";
     private static final String INVALID_ARG = "Invalid argument";
     private static final String INVALID_ARG_COUNT = "Too many arguments were passed";
-    private static final String USAGE = "Usage: [-v] [clean | compile | package | build]";
+    private static final String USAGE = "Usage: [-v] [clean | compile | package | build | create]";
 
     public enum OutTypes{
         TASK,
