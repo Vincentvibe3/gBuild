@@ -123,7 +123,7 @@ public class ProjectGenerator {
 
     public static String findTemplates(String templateChoice){
         Logging.print("Finding templates location", Logging.OutTypes.TASK);
-        String path = System.getenv("Path");
+        String path = System.getenv("PATH");
         ArrayList<String> gBuildlocations = new ArrayList<>();
         Consumer<String> findGbuild = item -> {
             if(item.contains("gBuild")&&item.endsWith("bin")){
