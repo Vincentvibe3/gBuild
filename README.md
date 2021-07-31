@@ -14,6 +14,8 @@ Build Tool for Java
   
 ## Installation
  Download a zip from the [releases page](https://github.com/Vincentvibe3/gBuild/releases) and set the ```bin``` directory to ```PATH```
+ 
+ On unix systems make the gBuild script executable with ```chmod +x```.
 
  Make sure the ```JAVA_HOME``` environment variable is set on Windows or if ```which java``` does not return any output on UNIX systems
 
