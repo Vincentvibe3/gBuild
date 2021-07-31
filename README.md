@@ -8,7 +8,9 @@ Build Tool for Java
 
 
 ## Dependencies
-[JSON-java(package org.json)](https://github.com/stleary/JSON-java)
+[JSON-java(org.json)](https://github.com/stleary/JSON-java)
+
+[JNA(org.sun.jna)](https://github.com/java-native-access/jna)
   
 ## Installation
  Download a zip from the [releases page](https://github.com/Vincentvibe3/gBuild/releases) and set the ```bin``` directory to ```PATH```
@@ -22,4 +24,12 @@ Build Tool for Java
 
   ```gBuild.cmd [-v] [clean | compile | package | build | create]``` on Windows
   
-  A ```build.json``` file in the root of the project is used to configure the build. An example can be found [here](https://github.com/Vincentvibe3/gBuild/blob/main/build.json)
+## Configuration
+  A ```build.json``` file in the root of the project is used to configure the build. An example can be found [here](https://github.com/Vincentvibe3/gBuild/blob/main/examples/build.json)
+
+## Creating Projects
+  A ```project.json``` file is used as a template from the project structure. An example can be found [here](https://github.com/Vincentvibe3/gBuild/blob/main/examples/project.json)
+  
+  All ```.java``` files defined in ```project.json``` will be replaced by a formatted ```template.java```. An example can be found [here](https://github.com/Vincentvibe3/gBuild/blob/main/examples/template.java)
+  
+  To create a new project template create a directory in ```gBuild/templates``` with the name of the template, then add ```template.java``` and ```project.json``` to it.
